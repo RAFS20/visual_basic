@@ -1,0 +1,61 @@
+Sub CrearDatosYGraficos()
+    ' Declaración de variables
+    Dim wsDatos As Worksheet, wsDashboard As Worksheet
+    Dim i As Integer, j As Integer
+    Dim rng As Range, rngUnique As Range
+    Dim chrt As ChartObject
+    Dim dict As Object
+    Dim varItem As Variant
+    Dim lastRow As Long
+    
+    Application.ScreenUpdating = False ' Desactiva la actualización de la pantalla para mejorar el rendimiento
+    
+    ' Crear hoja de datos simulados
+    Set wsDatos = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+    wsDatos.Name = "Datos Simulados"
+    
+    ' Crear hoja de dashboard
+    Set wsDashboard = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+    wsDashboard.Name = "Dashboard"
+    
+    ' Generar datos simulados
+    For i = 1 To 5 ' 5 variables
+        wsDatos.Cells(1, i).Value = "Variable " & i ' Etiqueta de la variable en la primera fila de la hoja de datos
+        For j = 2 To 101 ' 100 observaciones
+            wsDatos.Cells(j, i).Value = "Opción " & Chr(64 + Int((3 * Rnd()) + 1)) ' Genera opciones aleatorias y las coloca en la hoja de datos
+        Next j
+    Next i
+    
+    ' Crear gráficos de torta
+    For i = 1 To 5 ' 5 variables
+        Set dict = CreateObject("Scripting.Dictionary") ' Crear un objeto diccionario para almacenar los recuentos de las opciones
+        ' Contar la cantidad de cada opción
+        For j = 2 To 101
+            varItem = wsDatos.Cells(j, i).Value
+            If Not dict.Exists(varItem) Then
+                dict(varItem) = 0
+            End If
+            dict(varItem) = dict(varItem) + 1
+        Next j
+        
+        ' Transferir a la hoja Dashboard
+        lastRow = 1
+        For Each varItem In dict.Keys
+            wsDashboard.Cells(lastRow, (i - 1) * 2 + 1).Value = varItem ' Coloca la opción en la columna correspondiente
+            wsDashboard.Cells(lastRow, (i - 1) * 2 + 2).Value = dict(varItem) ' Coloca el recuento en la columna siguiente
+            lastRow = lastRow + 1
+        Next varItem
+        
+        ' Crear el gráfico de torta
+        Set rng = wsDashboard.Range(wsDashboard.Cells(1, (i - 1) * 2 + 1), wsDashboard.Cells(lastRow - 1, (i - 1) * 2 + 2)) ' Establece el rango de datos para el gráfico de torta
+        Set chrt = wsDashboard.ChartObjects.Add(Left:=((i - 1) Mod 3) * 240, Width:=200, Top:=Int((i - 1) / 3) * 240, Height:=200) ' Crea un objeto de gráfico en la posición adecuada del dashboard
+        With chrt.Chart
+            .SetSourceData Source:=rng ' Establece los datos del gráfico de torta
+            .ChartType = xlPie ' Establece el tipo de gráfico como gráfico de torta
+            .HasTitle = True ' Activa el título del gráfico
+            .ChartTitle.Text = "Variable " & i ' Establece el título del gráfico
+        End With
+    Next i
+    
+    Application.ScreenUpdating = True ' Vuelve a activar la actualización de la pantalla
+End Sub

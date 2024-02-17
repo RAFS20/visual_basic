@@ -1,0 +1,148 @@
+Option Explicit ' Habilita la declaración explícita de variables para prevenir errores de escritura
+
+Sub CalcularTFIDF() ' Subrutina principal para calcular TF-IDF
+    Dim ws As Worksheet ' Declara una variable para representar una hoja de Excel
+    Dim lastRow As Long ' Declara una variable para almacenar el número de la última fila utilizada
+    Dim documents As Object ' Declara un objeto diccionario para almacenar los documentos
+    Dim vocabulary As Object ' Declara un objeto diccionario para almacenar el vocabulario
+    Dim termCounts As Object ' Declara un objeto diccionario para almacenar las frecuencias de términos
+    Dim docIndex As Long ' Declara una variable para almacenar el índice del documento
+    Dim doc As Range ' Declara una variable para representar un rango de celdas (documento)
+    Dim terms As Variant ' Declara una variable para almacenar los términos de un documento como una matriz
+    Dim term As Variant ' Declara una variable para representar un término dentro de un documento
+    Dim tf As Double, idf As Double, tfidf As Double ' Declara variables para almacenar los valores de TF, IDF y TF-IDF
+    Dim tfidfString As String ' Declara una variable para almacenar la cadena de resultados de TF-IDF
+    
+    ' Referencia a la hoja de Excel
+    Set ws = ThisWorkbook.Sheets("Sheet1")
+    
+
+    lastRow = ws.Cells(ws.Rows.Count, "B").End(xlUp).Row
+    
+    ' Inicializar diccionarios
+    Set documents = CreateObject("Scripting.Dictionary") ' Inicializa el diccionario para almacenar los documentos
+    Set vocabulary = CreateObject("Scripting.Dictionary") ' Inicializa el diccionario para almacenar el vocabulario
+    Set termCounts = CreateObject("Scripting.Dictionary") ' Inicializa el diccionario para almacenar las frecuencias de términos
+    
+    ' Leer los documentos y construir el vocabulario
+    For Each doc In ws.Range("B2:B" & lastRow)
+        documents(doc.Row) = doc.Value ' Asigna el valor de la celda al diccionario de documentos
+        terms = Split(doc.Value, " ") ' Divide el contenido de la celda en términos separados por espacio
+        For Each term In terms ' Itera a través de cada término en el documento
+            If Not vocabulary.exists(term) Then ' Si el término no existe en el vocabulario
+                vocabulary(term) = 1 ' Agrega el término al vocabulario con una frecuencia de 1
+            Else ' Si el término ya existe en el vocabulario
+                vocabulary(term) = vocabulary(term) + 1 ' Incrementa la frecuencia del término en el vocabulario
+            End If
+        Next term
+    Next doc
+    
+    ' Calcular TF-IDF para cada término en cada documento
+    For Each doc In ws.Range("B2:B" & lastRow)
+        tfidfString = "" ' Inicializa la cadena de resultados de TF-IDF para el documento actual
+        
+        terms = Split(doc.Value, " ") ' Divide el contenido de la celda en términos separados por espacio
+        
+        ' Contar la frecuencia de cada término en el documento actual
+        Set termCounts = CreateObject("Scripting.Dictionary") ' Inicializa el diccionario para almacenar las frecuencias de términos en el documento
+        For Each term In terms ' Itera a través de cada término en el documento
+            If Not termCounts.exists(term) Then ' Si el término no existe en el diccionario de frecuencias de términos
+                termCounts(term) = 1 ' Agrega el término al diccionario con una frecuencia de 1
+            Else ' Si el término ya existe en el diccionario de frecuencias de términos
+                termCounts(term) = termCounts(term) + 1 ' Incrementa la frecuencia del término en el diccionario
+            End If
+        Next term
+        
+        ' Calcular TF-IDF para cada término y construir la cadena de resultados
+        For Each term In termCounts.keys ' Itera a través de cada término en el diccionario de frecuencias de términos
+            tf = termCounts(term) / UBound(terms) ' Calcula TF (frecuencia del término en el documento / número total de términos en el documento)
+            idf = Log(documents.Count / vocabulary(term)) ' Calcula IDF (logaritmo del número total de documentos / frecuencia del término en todos los documentos)
+            tfidf = tf * idf ' Calcula TF-IDF
+            tfidfString = tfidfString & term & ":" & Format(tfidf, "0.000") & ", " ' Agrega el término y su valor de TF-IDF a la cadena de resultados
+        Next term
+        
+        ' Eliminar la última coma y espacio de la cadena de resultados
+        If Len(tfidfString) > 0 Then ' Verifica si la cadena de resultados no está vacía
+            tfidfString = Left(tfidfString, Len(tfidfString) - 2) ' Elimina la última coma y espacio
+        End If
+        
+        ' Escribir la cadena de resultados TF-IDF en la columna G de la misma fila del documento
+        ws.Cells(doc.Row, "R").Value = tfidfString
+    Next doc
+    
+    MsgBox "TF-IDF calculation completed!" ' Muestra un mensaje indicando que el cálculo de TF-IDF ha sido completado
+End Sub
+
+' Subrutina secundaria para calcular TF-IDF (mismo proceso que la subrutina principal pero escribiendo resultados en columna H)
+Sub CalcularTFIDF2()
+    Dim ws As Worksheet ' Declara una variable para representar una hoja de Excel
+    Dim lastRow As Long ' Declara una variable para almacenar el número de la última fila utilizada
+    Dim documents As Object ' Declara un objeto diccionario para almacenar los documentos
+    Dim vocabulary As Object ' Declara un objeto diccionario para almacenar el vocabulario
+    Dim termCounts As Object ' Declara un objeto diccionario para almacenar las frecuencias de términos
+    Dim docIndex As Long ' Declara una variable para almacenar el índice del documento
+    Dim doc As Range ' Declara una variable para representar un rango de celdas (documento)
+    Dim terms As Variant ' Declara una variable para almacenar los términos de un documento como una matriz
+    Dim term As Variant ' Declara una variable para representar un término dentro de un documento
+    Dim tf As Double, idf As Double, tfidf As Double ' Declara variables para almacenar los valores de TF, IDF y TF-IDF
+    Dim tfidfValues As String ' Declara una variable para almacenar la cadena de valores de TF-IDF
+    
+    ' Referencia a la hoja de Excel
+    Set ws = ThisWorkbook.Sheets("Sheet1")
+    
+
+    lastRow = ws.Cells(ws.Rows.Count, "B").End(xlUp).Row
+    
+    ' Inicializar diccionarios
+    Set documents = CreateObject("Scripting.Dictionary") ' Inicializa el diccionario para almacenar los documentos
+    Set vocabulary = CreateObject("Scripting.Dictionary") ' Inicializa el diccionario para almacenar el vocabulario
+    Set termCounts = CreateObject("Scripting.Dictionary") ' Inicializa el diccionario para almacenar las frecuencias de términos
+    
+    ' Leer los documentos y construir el vocabulario
+    For Each doc In ws.Range("B2:B" & lastRow)
+        documents(doc.Row) = doc.Value ' Asigna el valor de la celda al diccionario de documentos
+        terms = Split(doc.Value, " ") ' Divide el contenido de la celda en términos separados por espacio
+        For Each term In terms ' Itera a través de cada término en el documento
+            If Not vocabulary.exists(term) Then ' Si el término no existe en el vocabulario
+                vocabulary(term) = 1 ' Agrega el término al vocabulario con una frecuencia de 1
+            Else ' Si el término ya existe en el vocabulario
+                vocabulary(term) = vocabulary(term) + 1 ' Incrementa la frecuencia del término en el vocabulario
+            End If
+        Next term
+    Next doc
+    
+    ' Calcular TF-IDF para cada término en cada documento
+    For Each doc In ws.Range("B2:B" & lastRow)
+        tfidfValues = "" ' Inicializa la cadena de valores de TF-IDF para el documento actual
+        
+        terms = Split(doc.Value, " ") ' Divide el contenido de la celda en términos separados por espacio
+        
+        ' Contar la frecuencia de cada término en el documento actual
+        Set termCounts = CreateObject("Scripting.Dictionary") ' Inicializa el diccionario para almacenar las frecuencias de términos en el documento
+        For Each term In terms ' Itera a través de cada término en el documento
+            If Not termCounts.exists(term) Then ' Si el término no existe en el diccionario de frecuencias de términos
+                termCounts(term) = 1 ' Agrega el término al diccionario con una frecuencia de 1
+            Else ' Si el término ya existe en el diccionario de frecuencias de términos
+                termCounts(term) = termCounts(term) + 1 ' Incrementa la frecuencia del término en el diccionario
+            End If
+        Next term
+        
+        ' Calcular TF-IDF para cada término y construir la cadena de valores
+        For Each term In termCounts.keys ' Itera a través de cada término en el diccionario de frecuencias de términos
+            tf = termCounts(term) / UBound(terms) ' Calcula TF (frecuencia del término en el documento / número total de términos en el documento)
+            idf = Log(documents.Count / vocabulary(term)) ' Calcula IDF (logaritmo del número total de documentos / frecuencia del término en todos los documentos)
+            tfidf = tf * idf ' Calcula TF-IDF
+            tfidfValues = tfidfValues & Format(tfidf, "0.000") & ";" ' Agrega el valor de TF-IDF a la cadena de valores
+        Next term
+        
+        ' Eliminar el último punto y coma de la cadena de valores
+        If Len(tfidfValues) > 0 Then ' Verifica si la cadena de valores no está vacía
+            tfidfValues = Left(tfidfValues, Len(tfidfValues) - 1) ' Elimina el último punto y coma
+        End If
+        
+        ' Escribir la cadena de valores de TF-IDF en la columna H de la misma fila del documento
+        ws.Cells(doc.Row, "S").Value = tfidfValues
+    Next doc
+    
+    MsgBox "TF-IDF calculation completed!" ' Muestra un mensaje indicando que el cálculo de TF-IDF ha sido completado
+End Sub

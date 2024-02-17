@@ -1,0 +1,142 @@
+Sub GenerarDatosEstadisticos()
+    ' Declaración de variables
+    Dim ws As Worksheet
+    Set ws = ThisWorkbook.Sheets("Hoja1") ' Se establece la hoja de trabajo donde se realizarán las operaciones
+    
+    Dim numRows As Integer
+    numRows = 100 ' Número de filas de datos a generar
+    
+    ' Generación de datos simulados aleatorios en la columna A
+    Dim i As Integer
+    For i = 1 To numRows
+        ws.Cells(i, 1).Value = WorksheetFunction.RandBetween(1, 100) ' Se generan números aleatorios y se colocan en la columna A
+    Next i
+    
+    ' Cálculo de medidas de estadística descriptiva
+    Dim dataRange As Range
+    Set dataRange = ws.Range("A1:A" & numRows) ' Se establece el rango de datos
+    
+    ' Media
+    ws.Cells(1, 3).Value = "Media"
+    ws.Cells(2, 3).Value = WorksheetFunction.Average(dataRange.Value) ' Se calcula y se coloca la media en la celda C2
+    
+    ' Mediana
+    ws.Cells(3, 3).Value = "Mediana"
+    ws.Cells(4, 3).Value = WorksheetFunction.Median(dataRange.Value) ' Se calcula y se coloca la mediana en la celda C4
+    
+    ' Moda
+    ws.Cells(5, 3).Value = "Moda"
+    ws.Cells(6, 3).Value = WorksheetFunction.Mode_Sngl(dataRange.Value) ' Se calcula y se coloca la moda en la celda C6
+    
+    ' Desviación estándar
+    ws.Cells(7, 3).Value = "Desviación Estándar"
+    ws.Cells(8, 3).Value = WorksheetFunction.StDev(dataRange.Value) ' Se calcula y se coloca la desviación estándar en la celda C8
+    
+    ' Varianza
+    ws.Cells(9, 3).Value = "Varianza"
+    ws.Cells(10, 3).Value = WorksheetFunction.Var(dataRange.Value) ' Se calcula y se coloca la varianza en la celda C10
+    
+    ' Mínimo
+    ws.Cells(11, 3).Value = "Mínimo"
+    ws.Cells(12, 3).Value = WorksheetFunction.Min(dataRange.Value) ' Se calcula y se coloca el mínimo en la celda C12
+    
+    ' Máximo
+    ws.Cells(13, 3).Value = "Máximo"
+    ws.Cells(14, 3).Value = WorksheetFunction.Max(dataRange.Value) ' Se calcula y se coloca el máximo en la celda C14
+    
+    ' Percentil 25
+    ws.Cells(15, 3).Value = "Percentil 25"
+    ws.Cells(16, 3).Value = WorksheetFunction.Percentile(dataRange.Value, 0.25) ' Se calcula y se coloca el percentil 25 en la celda C16
+    
+    ' Percentil 50 (Mediana)
+    ws.Cells(17, 3).Value = "Percentil 50 (Mediana)"
+    ws.Cells(18, 3).Value = WorksheetFunction.Percentile(dataRange.Value, 0.5) ' Se calcula y se coloca el percentil 50 (mediana) en la celda C18
+    
+    ' Percentil 75
+    ws.Cells(19, 3).Value = "Percentil 75"
+    ws.Cells(20, 3).Value = WorksheetFunction.Percentile(dataRange.Value, 0.75) ' Se calcula y se coloca el percentil 75 en la celda C20
+    
+    ' Rango intercuartílico
+    ws.Cells(21, 3).Value = "Rango Intercuartílico"
+    ws.Cells(22, 3).Value = WorksheetFunction.Quartile_Inc(dataRange.Value, 3) - WorksheetFunction.Quartile_Inc(dataRange.Value, 1) ' Se calcula y se coloca el rango intercuartílico en la celda C22
+    
+    ' Sesgo
+    ws.Cells(23, 3).Value = "Sesgo"
+    ws.Cells(24, 3).Value = WorksheetFunction.Skew(dataRange.Value) ' Se calcula y se coloca el sesgo en la celda C24
+    
+    ' Curtosis
+    ws.Cells(25, 3).Value = "Curtosis"
+    ws.Cells(26, 3).Value = WorksheetFunction.Kurt(dataRange.Value) ' Se calcula y se coloca la curtosis en la celda C26
+End Sub
+
+Sub GenerarDatosYGrafico()
+    ' Declaración de variables
+    Dim ws As Worksheet
+    Set ws = ThisWorkbook.Sheets("Hoja1") ' Se establece la hoja de trabajo donde se realizarán las operaciones
+    
+    Dim numRows As Integer
+    numRows = 100 ' Número de filas de datos a generar
+    
+    ' Generación de datos simulados aleatorios en la columna A
+    Dim i As Integer
+    For i = 1 To numRows
+        ws.Cells(i, 1).Value = WorksheetFunction.RandBetween(1, 100) ' Se generan números aleatorios y se colocan en la columna A
+    Next i
+    
+    ' Cálculo de medidas de estadística descriptiva
+    Dim dataRange As Range
+    Set dataRange = ws.Range("A1:A" & numRows) ' Se establece el rango de datos
+    
+    ' Creación de un nuevo gráfico en la hoja de Excel
+    Dim chartObj As ChartObject
+    Set chartObj = ws.ChartObjects.Add(Left:=100, Width:=375, Top:=75, Height:=225) ' Se crea un nuevo objeto gráfico
+    chartObj.Chart.ChartType = xlLine ' Se establece el tipo de gráfico como Líneas
+    
+    ' Configuración del gráfico
+    With chartObj.Chart
+        .SetSourceData Source:=dataRange ' Se establecen los datos del gráfico
+        .HasTitle = True ' Se activa el título del gráfico
+        .ChartTitle.Text = "Gráfico de Líneas" ' Se establece el título del gráfico
+        .Axes(xlCategory).HasTitle = True ' Se activa el título del eje de categorías
+        .Axes(xlCategory).AxisTitle.Text = "Categoría" ' Se establece el título del eje de categorías
+        .Axes(xlValue).HasTitle = True ' Se activa el título del eje de valores
+        .Axes(xlValue).AxisTitle.Text = "Valor" ' Se establece el título del eje de valores
+    End With
+End Sub
+
+Sub GenerarModelos()
+    ' Declaración de variables
+    Dim ws As Worksheet
+    Set ws = ThisWorkbook.Sheets.Add ' Se crea una nueva hoja de Excel
+    
+    ' Generación de datos simulados con ruido para dos variables relacionadas
+    Dim numRows As Integer
+    numRows = 50 ' Número de filas de datos a generar
+    
+    Dim i As Integer
+    For i = 1 To numRows
+        ' Generación de datos simulados con ruido
+        Dim x As Double
+        Dim y As Double
+        x = i
+        y = 2 * i + WorksheetFunction.RandBetween(-10, 10) ' Relación lineal con ruido
+        ws.Cells(i, 1).Value = x ' Se coloca la variable independiente en la columna A
+        ws.Cells(i, 2).Value = y ' Se coloca la variable dependiente en la columna B
+    Next i
+    
+    ' Agregación del diagrama de dispersión con línea de tendencia
+    Dim chartObj As ChartObject
+    Set chartObj = ws.ChartObjects.Add(Left:=100, Width:=375, Top:=75, Height:=225) ' Se crea un nuevo objeto gráfico
+    chartObj.Chart.ChartType = xlXYScatter ' Tipo de gráfico de dispersión
+    
+    ' Configuración del gráfico
+    With chartObj.Chart.SeriesCollection.NewSeries
+        .XValues = ws.Range("A1:A" & numRows) ' Se establecen los valores de X
+        .Values = ws.Range("B1:B" & numRows) ' Se establecen los valores de Y
+        .Trendlines.Add(Type:=xlLinear).Select ' Línea de tendencia lineal
+        ' Otras líneas de tendencia (polinómica, exponencial, logarítmica)
+        .Trendlines.Add(Type:=xlPolynomial, Order:=2).Select ' Polinómica de segundo grado
+        .Trendlines.Add(Type:=xlExponential).Select ' Exponencial
+        .Trendlines.Add(Type:=xlLogarithmic).Select ' Logarítmica
+    End With
+End Sub

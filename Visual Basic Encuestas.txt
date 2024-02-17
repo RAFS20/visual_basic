@@ -1,0 +1,57 @@
+Sub CreatePieChartsFromCategories()
+    Dim SourceSheet As Worksheet ' Declaración de variables para hoja de origen
+    Dim ChartsSheet As Worksheet ' Declaración de variables para hoja de gráficos
+    Dim LastRow As Long, LastColumn As Long, i As Long, j As Long ' Declaración de variables para el último fila, columna y contadores
+    Dim Rng As Range, ChartRng As Range ' Declaración de variables para rangos
+    Dim PieChart As ChartObject ' Declaración de variables para gráfico de torta
+    Dim CatCount As Object ' Declaración de variables para contar categorías
+    Dim Key As Variant ' Declaración de variables para la clave de categoría
+    Dim ChartTop As Double ' Declaración de variables para la posición superior del gráfico
+    
+    ' Define la hoja de origen y la hoja de destino para los gráficos
+    Set SourceSheet = ThisWorkbook.Worksheets("Sheet1") ' Establece la hoja de origen, cambia al nombre de tu hoja de datos
+    LastRow = SourceSheet.Cells(SourceSheet.Rows.Count, "A").End(xlUp).Row ' Encuentra la última fila con datos en la columna A
+    LastColumn = SourceSheet.Cells(1, SourceSheet.Columns.Count).End(xlToLeft).Column ' Encuentra la última columna con datos en la fila 1
+    
+    ' Crea una hoja nueva para los gráficos
+    Set ChartsSheet = ThisWorkbook.Worksheets.Add ' Añade una nueva hoja
+    ChartsSheet.Name = "PieCharts" ' Asigna un nombre a la nueva hoja
+    
+    ' Inicia la posición superior para los primeros gráficos
+    ChartTop = 10
+    
+    ' Crea un gráfico de torta para cada columna de categoría
+    For i = 1 To LastColumn
+        Set CatCount = CreateObject("Scripting.Dictionary") ' Inicializa un diccionario para contar las categorías
+        For j = 2 To LastRow ' Comienza en 2 para omitir el encabezado
+            Key = SourceSheet.Cells(j, i).Value ' Obtiene la clave de la categoría en la fila actual y columna actual
+            If Not CatCount.Exists(Key) Then ' Comprueba si la categoría ya existe en el diccionario
+                CatCount(Key) = 1 ' Si no existe, agrega la categoría con un valor de 1
+            Else
+                CatCount(Key) = CatCount(Key) + 1 ' Si existe, incrementa el contador para esa categoría
+            End If
+        Next j
+        
+        ' Crea el rango de datos para el gráfico
+        Set ChartRng = ChartsSheet.Cells(1, i * 2 - 1) ' Establece el rango de celdas para el título del gráfico
+        ChartRng.Value = SourceSheet.Cells(1, i).Value ' Asigna el título de la columna
+        Set ChartRng = ChartRng.Resize(CatCount.Count + 1, 2) ' Ajusta el rango para los datos del gráfico
+        
+        j = 0
+        For Each Key In CatCount.Keys ' Recorre las claves del diccionario
+            ChartRng.Cells(j + 2, 1).Value = Key ' Asigna la clave en la columna 1 del rango
+            ChartRng.Cells(j + 2, 2).Value = CatCount(Key) ' Asigna el valor (contador) en la columna 2 del rango
+            j = j + 1
+        Next Key
+        
+        ' Inserta el gráfico de torta
+        Set PieChart = ChartsSheet.ChartObjects.Add(Left:=100, Width:=375, Top:=ChartTop, Height:=225) ' Inserta un nuevo gráfico de torta
+        PieChart.Chart.SetSourceData Source:=ChartRng ' Establece el rango de datos para el gráfico
+        PieChart.Chart.ChartType = xlPie ' Establece el tipo de gráfico como de torta
+        PieChart.Chart.HasTitle = True ' Habilita el título del gráfico
+        PieChart.Chart.ChartTitle.Text = SourceSheet.Cells(1, i).Value ' Asigna el título del gráfico basado en el nombre de la columna
+        
+        ' Ajusta la posición superior para el próximo gráfico
+        ChartTop = ChartTop + 250 ' Aumenta la posición superior para colocar el próximo gráfico
+    Next i
+End Sub
